@@ -1,9 +1,45 @@
 <p>写这篇笔记是因为要修改一段原作者自己写的GCN部分的代码为torch_geometric部分的代码，而之前经常在生物、分子等等领域阅读到GCN相关模块但没有深入了解过。所以来紧急学习一下~<br>
+  
+# GNN 综述
+参考内容： <a href="https://zhuanlan.zhihu.com/p/613540675" title="链接">图神经网络的数学原理总结</a><br>
+**Graph 与 Image 的区别** - Graph是没有特定结构的，比如说社交网络、分子……而Image所指的一般是“图片”，在计算机中以张量的形式展现<br>
+
+**基本概念** - 最重要的就是**节点**与**边**。举例来讲，在有关分子的问题中**节点**就是当前这个原子，这个节点所具有的属性可能就是它的化学性质等等，**边**就是“键”，也可以具有相应的特征，比如单键、双键、配位键等等。
+
+**单个GNN网络中每个节点所包括的步骤：**
+1. 消息传递
+
+  一个人被所处的圈子影响，一个原子的性质被与它相连的其他原子影响。消息传递被定义为**获取邻居的节点特征**，消息就是**源节点转换后的节点特征**(这个“转换”也就是一种映射，可以是仿射变换，也可以是神经网络。)。<br>
+  
+2. 聚合
+
+  聚合就是将当前邻居结点的特征信息组合起来传递给当前节点(可以求和、求平均、求最大值、最小值...)
+  
+3. 更新
+
+  最后需要使用这些聚合信息以及当前节点本身的特征来更新当前节点的特征。
+
+
+**对整张图进行操作**
+1. 使用邻接矩阵
+
+  现在有一个存有每一个节点特征的矩阵，一行表示一个特征向量。通过一个邻接矩阵就可以得到当前这个节点所会用到的向量啦（**点积点积点积**）~
+  
+2. 添加自环
+
+  但是如果直接用邻接矩阵，聚合的消息就没有考虑到节点i自己的特征向量，所以要添加自环，利用单位矩阵实现。（一般就是A(A上面会带一个~) = A + I_N）
+
+  综上就可以不用单点用矩阵来实现GNN传递啦！
+
+  
+  
+# GCN 图卷积网络
+
 <p>主要结合代码分析，讲解GCN原理的博客还蛮多的！学习时主要参考的下面几篇：<br>
 1. <a href="https://mp.weixin.qq.com/s/I3MsVSR0SNIKe-a9WRhGPQ" title="链接">比较简单易懂的GCN原理解释</a><br>
 2. <a href="https://tkipf.github.io/graph-convolutional-networks/" title="链接">作者本人的博客</a><br>
 
-# torch_geometric中的实现方式
+## torch_geometric中的实现方式
 <p><a href="https://pytorch-geometric.readthedocs.io/en/latest/_modules/torch_geometric/nn/conv/gcn_conv.html#GCNConv.forward" title="gcn_conv">gcn_conv的官方代码地址</a><br>
   
 ![GCN核心公式](https://mmbiz.qpic.cn/mmbiz_png/QLDSy3Cx3YI5Td3Foo3KjnKQYYSh21NwNtkAYWoDgQjLEtdupCNJGw9quCiaos0qiafySOOR5sCPlT1I0SpSkOsw/640?wx_fmt=png&tp=webp&wxfrom=5&wx_lazy=1&wx_co=1 "GCN核心公式") <br>
@@ -310,4 +346,7 @@ class GCNConv(MessagePassing):
         return spmm(adj_t, x, reduce=self.aggr)
 ```
    
+
+
+# GIN 图同构神经网络
 
